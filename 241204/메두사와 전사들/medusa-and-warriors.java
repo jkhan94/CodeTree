@@ -351,6 +351,9 @@ public class Main {
 		// 장애물 처리: 설정된 시야각 범위에서 못 보는 곳을 0으로 변경
 		boolean obstructionFound = false;
 		// 메두사와 전사의 y가 같을 때, 전사 뒷부분 일직선 방향 셀 제거
+		// 전사 뒷칸부터 제거해야 함. 
+		// 즉, 해당 칸을 볼 수 있는지 체크하고, 그 칸에 전사가 있는지 확인한 다음
+		// 그 뒷칸(i-1한 다음)부터 제거해야 함.
 		for (int i = x - 1; i >= 0; i--) {					
 			if (obstructionFound) {
 				sightMap[i][y] = 0; // 장애물이 있으면 못 보는 곳으로 변경
