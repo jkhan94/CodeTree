@@ -1,61 +1,13 @@
-/*
-0에서 N−1의 범위로 이루어진 N×N. 도로는 0, 아니면 1.
-집은 좌표 (Sr ,Sc )에 있고, 공원은 좌표 (Er ,Ec). 집과 공원 좌표는 다를 수 있음.
-집 -> 공원으로 도로 따라 최단경로로 이동. 집과 공원은 항상 도로 위.
-전사가 처음부터 집에 있진 않음.
-
-M명의 전사. (ri,ci)에 위치. 메두사를 향해 최단 경로로 이동. 도로, 비도로 상관없이 이동.
-
-1 메두사 이동.
-도로 따라 1칸. 이동한 칸에 전사가 있으면 전사 소멸.
-최단경로가 여러 개면 상하좌우 순으로 우선.
-최단경로가 없을 수도 있음.
-
-2 메두사의 시선.
-상하좌우 중 택1. 전사를 가장 많이 볼 수 있는 방향을 봄. 우선순위는 상하좌우.
-바라보는 방향으로 90도 시야각. 메두사 위치 기준 9*9: 3 5 7 9가 5번. 
-
-한칸 8방향으로 나눴을 때, 메두사와 전사를 이은 선 뒷부분은 메두사에게 안 보임.
-같은 위치에 있으면 현 턴 패스, 턴 종료 시 이동가능.
-같은 간에 여러 전사가 있으면 전부 패스.
-
-3 전사들의 이동
-우선순위 상하좌우, 메두사와 거리 줄일 수 있는 방향으로 2칸 이동.
-메두사의 시야로 이동 불가.
-같은 칸 공유 가능.
-
-4 전사의 공격
-메두사와 같은 칸이면 전사 소멸.
-
-
-입력
-마을 크기 N, 전사의 수 M
-집 위치 sr sc, 공원 위치 er ec
-전사들의 좌표 a1r, a1e, a2r, ... 2*m개 1줄
-N줄에 걸쳐 도로 정보
-
-출력
-메두사가 공원에 도달할 때까지 매 턴마다 해당 턴에서 
-1. 모든 전사가 이동한 거리의 합, 
-2. 메두사로 인해 돌이 된 전사의 수, 
-3. 메두사를 공격한 전사의 수
-공백을 사이에 두고 차례대로 출력
-
-*최단경로는 맨해튼 거리 기준.
-*메두사가 공원에 도착하면 0을 출력 프로그램 종료.
-
-시간복잡도
-마을의 크기 N과 전사의 수 M에 따라 결정. 
-BFS를 사용하여 최단 경로를 계산하는 데 O(N^2) 소요
-전사들의 이동을 계산 O(M) 소요
-각 턴마다 메두사의 시야 계산 O(N^2)
-=> 전체 시간복잡도는 O(N^4 +(N^2)*M)
-*/
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
+
+/**
+ * 이 프로그램은 플레이어가 시작 지점에서 종료 지점으로 이동하면서 시야를 통해 전사들을 관리하는 게임 로직을 구현합니다. 장애물과 전사들이
+ * 있는 그리드에서 최적의 시야 방향을 선택하여 전사들의 이동을 제어하고, 전사들이 플레이어를 향해 이동하도록 합니다.
+ */
 public class Main {
 	// 상수 정의
 	static final int INF = Integer.MAX_VALUE; // 무한대를 나타내는 상수.
@@ -185,8 +137,10 @@ public class Main {
 			warriorCountGrid = updateWarriorCountGrid(N, M, warriorPositions);
 
 			// 결과 출력: 모든 전사가 이동한 거리의 합, 돌이 된 전사의 수, 메두사 공격한 전사 수
-			System.out.println(warriorResult.first + " " + sightCoverage + " " + warriorResult.second);
+			System.out.println(warriorResult.first + " " + sightCoverage + " " + warriorResult.second);			
 		}
+		
+		sc.close();
 	}
 
 	/**
@@ -397,16 +351,16 @@ public class Main {
 		// 장애물 처리: 설정된 시야각 범위에서 못 보는 곳을 0으로 변경
 		boolean obstructionFound = false;
 		// 메두사와 전사의 y가 같을 때, 전사 뒷부분 일직선 방향 셀 제거
-		for (int i = x - 1; i >= 0; i--) {			
-			if (warriorCountGrid[i][y] > 0) {
-				obstructionFound = true; // 전사가 있는 경우 장애물로 간주
-			}
-			
+		for (int i = x - 1; i >= 0; i--) {					
 			if (obstructionFound) {
 				sightMap[i][y] = 0; // 장애물이 있으면 못 보는 곳으로 변경
 			} else {
 				sightMap[i][y] = 1; // 장애물이 없으면 보이는 곳 유지
 			}			
+
+			if (warriorCountGrid[i][y] > 0) {
+				obstructionFound = true; // 전사가 있는 경우 장애물로 간주
+			}
 		}
 		// 메두사와 y가 다른 전사들의 대각선 방향 뒷부분 셀 제거
 		for (int i = x - 1; i >= 1; i--) {
