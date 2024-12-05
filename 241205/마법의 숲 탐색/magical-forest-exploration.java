@@ -33,34 +33,36 @@ i번째로 숲을 탐색하는 골렘은 숲의 가장 북쪽에서 시작해
 */
 import java.util.*;
 public class Main {
-    	private static final int MAX_L = 70; // R,C 최대값
+   private static final int MAX_L = 70; // R,C 최대값
 
 	private static int R, C, K; // 행, 열, 골렘의 개수를 의미합니다
+	// 골렘은 (0, x)부터 시작. 만약 숲이 0행부터 시작할 경우 골렘 중심은 1행부터 시작. 문제는 숲이 꽉 찼을 경우 초입부터 막힐 수 있단 것.
+	// 그래서 숲에 진입 가능한지 파악하기 위해 상단에 골렘이 차지하는 3행만큼 추가한 것.
 	private static int[][] A = new int[MAX_L + 3][MAX_L]; // 행+3개 하여 실제 숲을 [3~R+2][0~C-1]로 사용. 골렘id 저장.
 	private static int[] dy = { -1, 0, 1, 0 }, dx = { 0, 1, 0, -1 }; // 북동남서
 	private static boolean[][] isExit = new boolean[MAX_L + 3][MAX_L]; // 해당 칸이 골렘의 출구인지 저장
 	private static int answer = 0; // 각 정령들이 도달할 수 있는 최하단 행의 총합
 
 	public static void main(String[] args) {
-	//		입력
+//		입력
 		Scanner sc = new Scanner(System.in);
 //		1. 숲의 크기를 의미하는 R, C, 정령의 수 K
 		R = sc.nextInt();
 		C = sc.nextInt();
 		K = sc.nextInt();
 //		2. K개의 줄에 거쳐 각 골렘이 출발하는 열 x(중앙 칸 위치), 골렘의 출구 방향 정보 d(0,1,2,3 북동남서)
-        for (int id = 1; id <= K; id++) { // 골렘 번호 id
-            int x = sc.nextInt() - 1;
-            int d = sc.nextInt();
-            down(0, x, d, id);
-        }
+		for (int id = 1; id <= K; id++) { // 골렘 번호 id
+			int x = sc.nextInt() - 1;
+			int d = sc.nextInt();
+			down(0, x, d, id);
+		}
 //		출력
 //		1. 첫번째 줄에 각 정령들이 최종적으로 위치한 행의 총합
 //		골렘이 숲 밖에 있을 경우 보드 초기화. 헤당 턴에는 행 계산 안 함.
 //		숲이 다시 텅 비게 돼도 행의 총합은 누적됨.
 		System.out.println(answer);
 
-        sc.close();
+		sc.close();
 	}
 
 	// 골렘id가 중심 (y, x), 출구의 방향이 d일때 규칙에 따라 움직임을 취하는 함수입니다
@@ -74,17 +76,17 @@ public class Main {
 			down(y + 1, x - 1, (d + 3) % 4, id); // 왼쪽 아래. 서쪽 회전
 		} else if (canGo(y + 1, x + 1)) {
 			down(y + 1, x + 1, (d + 1) % 4, id); // 오른쪽 아래. 동쪽 회전
-		} else { 
+		} else {
 			// 1, 2, 3의 움직임을 모두 취할 수 없을 떄
 			// 중심 기준 좌상단 또는 우하단이 범위 밖이면
 			if (!inRange(y - 1, x - 1) || !inRange(y + 1, x + 1)) {
 				resetMap(); // 모든 골렘이 숲을 빠져나갑니다
 			} else {
-				// 골렘이 숲 안에 있지만 더 이상 움직일 수 없으면 골렘 위치 기록 = 못 가는 곳 
+				// 골렘이 숲 안에 있지만 더 이상 움직일 수 없으면 골렘 위치 기록 = 못 가는 곳
 				A[y][x] = id; // 골렘 중심
 				for (int k = 0; k < 4; k++) {
 					A[y + dy[k]][x + dx[k]] = id; // 골렘 중심 기준 북동남서
-				}	
+				}
 				isExit[y + dy[d]][x + dx[d]] = true; // 골렘의 출구를 기록
 				answer += bfs(y, x) - 3 + 1; // bfs를 통해 정령이 최대로 내려갈 수 있는 행를 계산하여 누적합
 			}
@@ -97,12 +99,12 @@ public class Main {
 	private static boolean canGo(int y, int x) {
 		boolean flag = 0 <= x - 1 && x + 1 < C && y + 1 < R + 3;
 		flag = flag && (A[y - 1][x - 1] == 0); // 좌상단
-		flag = flag && (A[y - 1][x] == 0);     // 상단
+		flag = flag && (A[y - 1][x] == 0); // 상단
 		flag = flag && (A[y - 1][x + 1] == 0); // 우상단
-		flag = flag && (A[y][x - 1] == 0);     // 좌측
-		flag = flag && (A[y][x] == 0);         // 중심
-		flag = flag && (A[y][x + 1] == 0);     // 우측
-		flag = flag && (A[y + 1][x] == 0);     // 하단
+		flag = flag && (A[y][x - 1] == 0); // 좌측
+		flag = flag && (A[y][x] == 0); // 중심
+		flag = flag && (A[y][x + 1] == 0); // 우측
+		flag = flag && (A[y + 1][x] == 0); // 하단
 		return flag;
 	}
 
@@ -110,32 +112,32 @@ public class Main {
 	private static boolean inRange(int y, int x) {
 		return 3 <= y && y < R + 3 && 0 <= x && x < C;
 	}
-	
+
 	// 숲에 있는 골렘들이 모두 빠져나갑니다
-		private static void resetMap() {
-			for (int i = 0; i < R + 3; i++) {
-				for (int j = 0; j < C; j++) {
-					A[i][j] = 0;
-					isExit[i][j] = false;
-				}
+	private static void resetMap() {
+		for (int i = 0; i < R + 3; i++) {
+			for (int j = 0; j < C; j++) {
+				A[i][j] = 0;
+				isExit[i][j] = false;
 			}
 		}
+	}
 
 	// 정령이 움직일 수 있는 모든 범위를 확인하고 도달할 수 있는 최하단 행을 반환
 	private static int bfs(int y, int x) {
 		int result = y; // 현위치를 최하단 행으로 설정
 		Queue<int[]> q = new LinkedList<>();
 		boolean[][] visit = new boolean[MAX_L + 3][MAX_L];
-		
+
 		q.offer(new int[] { y, x }); // 현재 중심을 큐에 삽입
 		visit[y][x] = true;
-		
+
 		while (!q.isEmpty()) {
 			int[] cur = q.poll();// 현위치
 			for (int k = 0; k < 4; k++) { // 북동남서 순으로 탐색
 				int ny = cur[0] + dy[k]; // ny,nx는 정령이 가려는 위치
-				int nx = cur[1] + dx[k]; 
-				
+				int nx = cur[1] + dx[k];
+
 				if (inRange(ny, nx) // 정령이 가려는 위치는 숲 내부이고,
 						&& !visit[ny][nx] // 방문하지 않았고, (이미 방문했으면 안 가도 됨)
 						&& (A[ny][nx] == A[cur[0]][cur[1]] // 이동할 위치와 현위치에 저장된 골렘 id 동일(=골렘 내부)거나
